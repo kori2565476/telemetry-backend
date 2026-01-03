@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+pytest
+sqlmodel
+psycopg2-binary

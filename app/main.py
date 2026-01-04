@@ -1,14 +1,24 @@
 from fastapi import FastAPI, Depends
 from sqlmodel import SQLModel, Session, create_engine, Field
 from typing import Annotated # necesario si usamos python 3.9+ para el tipo sessiondeep
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
+print("DATABASE_URL:", DATABASE_URL)
 # --- 1. CONFIGURACION DE LA BASE DE DATOS ---
 #usamos la cadena de conexion con los datos del docker run
 # postgressql://user:password@host:port/database_name
 
-DATABASE_URL = "postgresql://postgres:bruteforce@localhost:5432/postgres"
+#DATABASE_URL = "postgresql/postgres"  deleted 
 #crea el motor engine de la base de datos
 engine = create_engine(DATABASE_URL, echo=True) #'echo=True para ver las consultas SQL en la consola
+
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
+
+
 
 #define una funcion para crear y cerrar la sesion de BD automatic
 def get_session():

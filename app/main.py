@@ -4,57 +4,64 @@ from typing import Annotated # necesario si usamos python 3.9+ para el tipo sess
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
-print("DATABASE_URL:", DATABASE_URL)
-# --- 1. CONFIGURACION DE LA BASE DE DATOS ---
-#usamos la cadena de conexion con los datos del docker run
-# postgressql://user:password@host:port/database_name
 
-#DATABASE_URL = "postgresql/postgres"  deleted 
-#crea el motor engine de la base de datos
-engine = create_engine(DATABASE_URL, echo=True) #'echo=True para ver las consultas SQL en la consola
+from app.routers import auth 
 
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not set")
+app.include_router(auth.router)
 
+from .db.session import engine, get_session
+from .schemas.schemas import TareaCreate, TareaRead, TareaUpdate
+from .crud.crud import(
+    create_tarea,
+    get_tareas,
+    get_tarea,
+    update_tarea,
+    delete_tarea
+)
 
-
-#define una funcion para crear y cerrar la sesion de BD automatic
-def get_session():
-    with Session(engine) as session:
-        yield session
-
-#define la dependendica de FastAPI para la sesion
-SessionDep = Annotated[Session, Depends(get_session)]
-# --- 2. DEFINICION DEL MODELO DE DATOS ---
-# crea una tabla de ejem , podemos mover esto a otro archivo luego
-class Tarea(SQLModel, table=True):
-    id : int | None = Field(default=None, primary_key=True)
-    descripcion : str
-    completada : bool = Field(default=False)
-# --- 3. CREACION DE LA APLICACION FASTAPI ---
 app = FastAPI(title="Telemetry Backend")
 
-# crea las tablas al iniciar la app(solo para desarrollo inicial
-# luego usaremos Alembic)
+# We do not need this anymore , we are using alembic
+# ALEMBIC
+#@app.on_event("startup")
+#def on_startup():
+ #   SQLModel.metadata.create_all(engine)
 
-@app.on_event("startup")
-def on_startup():
-    SQLModel.metadata.create_all(engine)
+@app.get("/tareas/", response_model=list[TareaRead])
+def listar_tareas(session: Session = Depends(get_session)):
+    return get_tareas(session)
 
-
-@app.get("/")
-def health_check():
-    return {"status": "ok"}
-@app.get("/ping")
-def ping():
-    return {"message": "pong"}
-
-#---4. NUEVO ENDPOINT DE EJM CON BD---
-@app.post("/tareas/")
-def crear_tarea(tarea: Tarea, session: SessionDep):
-    session.add(tarea)
-    session.commit()
-    session.refresh(tarea)
+@app.get("/tareas/{tarea_id}", response_model=TareaRead)
+def obtener_tarea(tarea_id: int, session: Session = Depends(get_session)):
+    tarea = get_tarea(session, tarea_id)
+    if not tarea:
+        raise HTTPException(status_code=404, detail="Tarea not found")
     return tarea
+
+@app.post("/tareas/", response_model=TareaRead)
+def crear_tarea_endpoint(
+    tarea_in: TareaCreate,
+    session: Session = Depends(get_session)
+):
+    return create_tarea(session, tarea_in)
+
+@app.put("/tareas/{tarea_id}", response_model=TareaRead)
+def actualizar_tarea_endpoint(
+    tarea_id: int,
+    tarea_in: TareaUpdate,
+    session: Session = Depends(get_session)
+):
+    tarea = get_tarea(session, tarea_id)
+    if not tarea:
+        raise HTTPException(status_code=404, detail="Tarea not found")
+    return update_tarea(session, tarea, tarea_in)
+
+@app.delete("/tareas/{tarea_id}", status_code=204)
+def eliminar_tarea_endpoint(
+    tarea_id: int,
+    session: Session = Depends(get_session)
+):
+    tarea = get_tarea(session, tarea_id)
+    if not tarea:
+        raise HTTPException(status_code=404, detail="Tarea not found")
+    delete_tarea(session, tarea)

@@ -3,10 +3,10 @@ from typing import Optional
 
 from jose import jwt
 from passlib.context import CryptContext
-from sqlmodel import Session
+# from sqlmodel import Session
 
 from app.core.config import settings
-from app.crud.user import get_user_by_email
+# from app.crud.user import get_user_by_email
 
 # Password hashing
 pwd_context = CryptContext(
@@ -21,21 +21,6 @@ def hash_password(password: str) -> str:
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
-
-
-def authenticate_user(
-    session: Session,
-    email: str,
-    password: str
-):
-    user = get_user_by_email(session, email)
-    if not user:
-        return None
-
-    if not verify_password(password, user.hashed_password):
-        return None
-
-    return user
 
 
 

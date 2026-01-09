@@ -3,12 +3,12 @@ from sqlmodel import Session
 
 
 
-from app.services.auth import authenticate_user
+#from app.services.auth import authenticate_user
 from app.core.security import create_access_token
 
 
 from app.schemas.auth import LoginRequest, Token
-from app.db import get_session
+from app.db.session import get_session
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

@@ -5,7 +5,7 @@ import os
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-print("DATABASE_URL =>", repr(DATABASE_URL))
+#print("DATABASE_URL =>", repr(DATABASE_URL))
 # esta ultima linea es solo para debug temporal
 
 if not DATABASE_URL :

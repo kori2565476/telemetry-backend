@@ -1,25 +1,25 @@
-from fastapi import FastAPI, Depends
-from sqlmodel import SQLModel, Session, create_engine, Field
-from typing import Annotated # necesario si usamos python 3.9+ para el tipo sessiondeep
-from dotenv import load_dotenv
-import os
+from fastapi import FastAPI, Depends, HTTPException
+from sqlmodel import Session
 
-
-from app.routers import auth 
-
-app.include_router(auth.router)
-
-from .db.session import engine, get_session
-from .schemas.schemas import TareaCreate, TareaRead, TareaUpdate
-from .crud.crud import(
+from app.routers import auth
+from app.db.session import get_session
+from app.schemas.schemas import TareaCreate, TareaRead, TareaUpdate
+from app.crud.crud import (
     create_tarea,
     get_tareas,
     get_tarea,
     update_tarea,
-    delete_tarea
+    delete_tarea,
 )
 
 app = FastAPI(title="Telemetry Backend")
+#el FastAPI siempre debe ir antes de include_router
+
+#routers
+app.include_router(auth.router)
+
+
+
 
 # We do not need this anymore , we are using alembic
 # ALEMBIC
@@ -27,6 +27,8 @@ app = FastAPI(title="Telemetry Backend")
 #def on_startup():
  #   SQLModel.metadata.create_all(engine)
 
+
+# endpoints
 @app.get("/tareas/", response_model=list[TareaRead])
 def listar_tareas(session: Session = Depends(get_session)):
     return get_tareas(session)

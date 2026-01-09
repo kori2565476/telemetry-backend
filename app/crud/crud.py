@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
-from .models import Tarea
-from .schemas import TareaCreate, TareaUpdate
+from app.models.tarea import Tarea
+from ..schemas.schemas import TareaCreate, TareaUpdate
 
 def create_tarea(session: Session, tarea_in: TareaCreate) -> Tarea:
     tarea = Tarea.model_validate(tarea_in)

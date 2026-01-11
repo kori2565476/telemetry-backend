@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import Session
 
-from app.routers import auth
+from app.routers import leads, auth
+
 from app.db.session import get_session
 from app.schemas.schemas import TareaCreate, TareaRead, TareaUpdate
 from app.crud.crud import (
@@ -17,7 +18,8 @@ app = FastAPI(title="Telemetry Backend")
 
 #routers
 app.include_router(auth.router)
-
+app.include_router(leads.router)
+# con esto ya se activan los imports de arriba
 
 
 

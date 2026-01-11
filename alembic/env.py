@@ -3,12 +3,17 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
+from alembic import op
+import sqlalchemy as sa
+
 from alembic import context
 from sqlmodel import SQLModel
 
 from app.models import *
 #from app import * 
 target_metadata = SQLModel.metadata
+from app.models.tarea import Tarea
+from app.models.lead import Lead
 
 
 from dotenv import load_dotenv

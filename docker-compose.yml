@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: telemetry_db
+    restart: always
+    environment:
+      POSTGRES_USER: telemetry
+      POSTGRES_PASSWORD: telemetry
+      POSTGRES_DB: telemetry_db
+    ports:
+      - "5433:5432"   # ⚠ diferente al 5432 que usa tu otro proyecto
+    volumes:
+      - telemetry_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: telemetry_api
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  telemetry_data:

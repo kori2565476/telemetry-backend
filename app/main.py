@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import Session
 
-from app.routers import leads, auth
+from app.routers import leads, auth, tarea
 
 from app.db.session import get_session
 from app.schemas.schemas import TareaCreate, TareaRead, TareaUpdate
@@ -19,6 +19,10 @@ app = FastAPI(title="Telemetry Backend")
 #routers
 app.include_router(auth.router)
 app.include_router(leads.router)
+app.include_router(devices.router)
+app.include_router(user.router)
+app.include_router(telemetry.router)
+app.include_router(tarea.router)
 # con esto ya se activan los imports de arriba
 
 
@@ -31,7 +35,7 @@ app.include_router(leads.router)
 
 
 # endpoints
-@app.get("/tareas/", response_model=list[TareaRead])
+""" @app.get("/tareas/", response_model=list[TareaRead])
 def listar_tareas(session: Session = Depends(get_session)):
     return get_tareas(session)
 
@@ -69,3 +73,5 @@ def eliminar_tarea_endpoint(
     if not tarea:
         raise HTTPException(status_code=404, detail="Tarea not found")
     delete_tarea(session, tarea)
+
+    """
